@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admissions Outreach Master Calendar (July 2026 - January 2027)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-900 text-white shadow-md">
+        <div
+            class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                    <i class="fa-solid fa-graduation-cap text-indigo-400"></i> Admissions Outreach Calendar
+                </h1>
+                <p class="text-indigo-200 text-sm mt-1">Strategic Recruitment & Institution Visit Master Schedule (July 2026
+                    – January 2027)</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openAddModal()"
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Visit
+                </button>
+                <button onclick="exportData()"
+                    class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-download"></i> Export JSON
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8">
+
+        <!-- Controls & Filters -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col gap-4">
+
+            <!-- Top Row: Month Selector Tabs -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div id="month-tabs" class="flex flex-wrap gap-1 bg-slate-100 p-1.5 rounded-lg w-full md:w-auto">
+                    <button onclick="filterMonth('All')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md bg-white text-indigo-900 shadow-sm transition">All
+                        Months</button>
+                    <button onclick="filterMonth('July')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">July</button>
+                    <button onclick="filterMonth('August')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Aug</button>
+                    <button onclick="filterMonth('September')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Sept</button>
+                    <button onclick="filterMonth('October')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Oct</button>
+                    <button onclick="filterMonth('November')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Nov</button>
+                    <button onclick="filterMonth('December')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Dec</button>
+                    <button onclick="filterMonth('January')"
+                        class="month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition">Jan</button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="relative w-full md:w-72">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <i class="fa-solid fa-search"></i>
+                    </span>
+                    <input type="text" id="search-input" oninput="handleSearch()"
+                        placeholder="Search school, city, dept..."
+                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                </div>
+            </div>
+
+            <!-- Bottom Row: Status Filter Tabs -->
+            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Status Filter:</span>
+                <button onclick="filterStatus('All')" id="status-tab-All"
+                    class="status-tab px-3 py-1 text-xs font-semibold rounded-full bg-indigo-900 text-white transition">All
+                    Status</button>
+                <button onclick="filterStatus('Upcoming')" id="status-tab-Upcoming"
+                    class="status-tab px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Upcoming</button>
+                <button onclick="filterStatus('Completed')" id="status-tab-Completed"
+                    class="status-tab px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Completed</button>
+                <button onclick="filterStatus('Cancelled')" id="status-tab-Cancelled"
+                    class="status-tab px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Cancelled</button>
+            </div>
+        </div>
+
+        <!-- Visits Grid Container -->
+        <div id="visits-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Cards Injected Here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state"
+            class="hidden text-center py-16 bg-white rounded-xl border border-dashed border-slate-300 mt-4">
+            <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300 mb-3"></i>
+            <h3 class="text-lg font-medium text-slate-700">No school visits found</h3>
+            <p class="text-sm text-slate-500 mt-1">Try adjusting your search filters or add a new scheduled visit.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        Admissions Office Outreach Portal &bull; All data is stored locally in your browser session.
+    </footer>
+
+    <!-- Add/Edit Visit Modal -->
+    <div id="visit-modal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div
+            class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-100 transform transition-all max-h-[90vh] flex flex-col">
+            <div class="bg-indigo-900 px-6 py-4 flex justify-between items-center text-white shrink-0">
+                <h3 id="modal-title" class="font-bold text-lg">Schedule School Visit</h3>
+                <button onclick="closeModal()" class="text-indigo-200 hover:text-white transition"><i
+                        class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="visit-form" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="visit-id">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">School
+                        Name</label>
+                    <input type="text" id="school-name" required placeholder="e.g. Oakridge International"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Month</label>
+                        <select id="visit-month"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                            <option value="January">January</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Date &
+                            Time</label>
+                        <input type="text" id="visit-date" required placeholder="e.g. Jul 15, 10:00 AM"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Location
+                            / City</label>
+                        <input type="text" id="visit-location" required placeholder="e.g. Pune, MH"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Status</label>
+                        <select id="visit-status"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Event
+                            Type</label>
+                        <select id="visit-type"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="School Education Fair">School Education Fair</option>
+                            <option value="Career Guidance Session">Career Guidance Session</option>
+                            <option value="Vidyal AI Session">Vidyal AI Session</option>
+                            <option value="LiFE Programme Session">LiFE Programme Session</option>
+                            <option value="College Visit">College Visit</option>
+                            <option value="Workshop">Workshop</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Department
+                            Details</label>
+                        <input type="text" id="visit-department" required placeholder="e.g. Outreach & STEM Dept"
+                            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Visiting
+                        Personnel / Team</label>
+                    <input type="text" id="visit-personnel" required placeholder="e.g. Sarah Jenkins & Alex Ross"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Notes /
+                        Target Audience</label>
+                    <textarea id="visit-notes" rows="2"
+                        placeholder="e.g. Addressing grade 11 & 12 students in the main auditorium."
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 shrink-0">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 shadow transition">Save
+                        Visit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Initial Master Data spanning July 2026 to January 2027 including Siliguri, August Kolkata/Darjeeling, September/October Fairs and Jabalpur Tour
+        let visits = [
+            // July 2026 - Office of Admissions Outreach (Siliguri)
+            {
+                id: '101',
+                schoolName: 'Olivia Enlightened English School',
+                month: 'July',
+                date: 'Jul 27, 2026 (08:30 AM)',
+                location: 'Siliguri, West Bengal (734425)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 8:30 AM | Interaction: 8:45 AM - 10:00 AM. Address: Near Bidhannagar, Bhimbar Madati.'
+            },
+            {
+                id: '102',
+                schoolName: 'Modi Public School',
+                month: 'July',
+                date: 'Jul 27, 2026 (11:45 AM)',
+                location: 'Siliguri, West Bengal (734010)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 11:45 AM | Interaction: 12:00 PM - 1:00 PM. Address: Phathargata Road, Matigara.'
+            },
+            {
+                id: '103',
+                schoolName: 'Don Bosco Siliguri',
+                month: 'July',
+                date: 'Jul 28, 2026 (09:45 AM)',
+                location: 'Siliguri, West Bengal (734001)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 9:45 AM | Interaction: 10:00 AM - 11:15 AM. Address: Sevoke Rd, 2nd Mile.'
+            },
+            {
+                id: '104',
+                schoolName: 'Sri Sri Academy',
+                month: 'July',
+                date: 'Jul 28, 2026 (12:45 PM)',
+                location: 'Siliguri, West Bengal (734010)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 12:45 PM | Interaction: 1:00 PM - 2:30 PM. Address: Dhukuria, P.O. New Chumta, Dagapur.'
+            },
+            {
+                id: '105',
+                schoolName: 'Birla Divya Jyoti',
+                month: 'July',
+                date: 'Jul 29, 2026 (09:45 AM)',
+                location: 'Siliguri, West Bengal (734010)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 9:45 AM | Interaction: 10:00 AM - 11:30 AM. Address: Matigara Zone-F, Uttorayon Twp.'
+            },
+            {
+                id: '106',
+                schoolName: 'Siliguri Model High School',
+                month: 'July',
+                date: 'Jul 29, 2026 (12:45 PM)',
+                location: 'Siliguri, West Bengal (734012)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 12:45 PM | Interaction: 1:00 PM - 2:30 PM. Address: Kawakhali / S.S.B, opp. North Bengal Medical College.'
+            },
+            {
+                id: '107',
+                schoolName: 'Don Bosco Odlabari',
+                month: 'July',
+                date: 'Jul 30, 2026 (08:40 AM)',
+                location: 'Odlabari, West Bengal (735222)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 8:40 AM | Interaction: 9:00 AM - 10:15 AM. Address: Dakshin Odlabari.'
+            },
+            {
+                id: '108',
+                schoolName: 'North Point Residential School',
+                month: 'July',
+                date: 'Jul 30, 2026 (12:15 PM)',
+                location: 'Siliguri, West Bengal (734012)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 12:15 PM | Interaction: 12:30 PM - 2:00 PM. Address: Opposite S.S.B.Camp, Ranidanga.'
+            },
+            {
+                id: '109',
+                schoolName: "Jermel's Academy",
+                month: 'July',
+                date: 'Jul 31, 2026 (08:45 AM)',
+                location: 'Siliguri, West Bengal (734006)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 8:45 AM | Interaction: 9:00 AM - 10:15 AM. Address: Dabgram, Siliguri.'
+            },
+            {
+                id: '110',
+                schoolName: 'Doon Heritage Academy',
+                month: 'July',
+                date: 'Jul 31, 2026 (11:45 AM)',
+                location: 'Siliguri, West Bengal (734003)',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Victoria & Ms. Jesty Mariam',
+                status: 'Completed',
+                notes: 'Reporting: 11:45 AM | Interaction: 12:00 PM - 1:30 PM. Address: Kolabari Rd, Champasari.'
+            },
+            // August 2026 Kolkata & Darjeeling - School of Law Tour
+            {
+                id: '301',
+                schoolName: "St. John's High School",
+                month: 'August',
+                date: 'Aug 10, 2026',
+                location: 'Kolkata, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '302',
+                schoolName: 'Methodist School',
+                month: 'August',
+                date: 'Aug 11, 2026',
+                location: 'Kolkata, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '303',
+                schoolName: "St. Jude's School",
+                month: 'August',
+                date: 'Aug 12, 2026',
+                location: 'Kolkata, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '304',
+                schoolName: 'Loreto Convent Entally',
+                month: 'August',
+                date: 'Aug 13, 2026',
+                location: 'Kolkata, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '305',
+                schoolName: 'National English School, Baguiati',
+                month: 'August',
+                date: 'Aug 14, 2026',
+                location: 'Kolkata, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '306',
+                schoolName: 'Mount Herman, Darjeeling',
+                month: 'August',
+                date: 'Aug 18, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '307',
+                schoolName: "St. Paul's Darjeeling",
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '308',
+                schoolName: 'Loreto Convent Darjeeling',
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '309',
+                schoolName: 'St. Teresa Darjeeling',
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '310',
+                schoolName: "St. Joseph's Darjeeling",
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '311',
+                schoolName: "St. Michael's Darjeeling",
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '312',
+                schoolName: 'Sunrise School Darjeeling',
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '313',
+                schoolName: "St. Robert's Darjeeling",
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '314',
+                schoolName: 'NotreDam Academy Darjeeling',
+                month: 'August',
+                date: 'Aug 19, 2026',
+                location: 'Darjeeling, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            {
+                id: '315',
+                schoolName: 'St. Augustine, Barrackpore',
+                month: 'August',
+                date: 'Aug 21, 2026',
+                location: 'Barrackpore, West Bengal',
+                type: 'School Education Fair',
+                department: 'School of Law',
+                personnel: 'Dr. Sarabani & Prof. Shaheen Marakkar',
+                status: 'Completed',
+                notes: 'Kolkata & Darjeeling outreach tour by School of Law faculty.'
+            },
+            // September & October 2026 Education Fairs & Jabalpur Tour
+            {
+                id: '201',
+                schoolName: 'Victorious Kidss Educares (Scholario Fair)',
+                month: 'September',
+                date: 'Sep 03, 2026 (2:00 PM - 4:00 PM)',
+                location: 'Kharadi, Pune, Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Anausa',
+                status: 'Completed',
+                notes: 'Scholario Overseas Education Fair.'
+            },
+            {
+                id: '202',
+                schoolName: 'Sanjay Ghodawat International School (SGIS)',
+                month: 'September',
+                date: 'Sep 12, 2026 (9:00 AM - 4:00 PM)',
+                location: 'Kolhapur, Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Mariya & Dr. Avichal',
+                status: 'Completed',
+                notes: 'SGIS University Fair Dept.'
+            },
+            {
+                id: '203',
+                schoolName: 'Reliance Foundation School',
+                month: 'September',
+                date: 'Sep 12, 2026 (10:00 AM - 1:00 PM)',
+                location: 'Kopar Khairane, Navi Mumbai',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Mr. Vishnu Pillai',
+                status: 'Completed',
+                notes: 'Sector 14, Plot No. 60-61, Gagangiri Maharaj Marg.'
+            },
+            {
+                id: '204',
+                schoolName: 'Chatrabhuj Narsee School',
+                month: 'September',
+                date: 'Sep 17, 2026 (10:00 AM - 11:30 AM)',
+                location: 'Amanora, Pune, Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Ms. Anausa',
+                status: 'Completed',
+                notes: 'Global University Fair at Amanora Pune.'
+            },
+            {
+                id: '205',
+                schoolName: 'Bombay Scottish School',
+                month: 'September',
+                date: 'Sep 19, 2026 (9:00 AM - 1:00 PM)',
+                location: 'Mahim Campus, Mumbai',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Dr. Vandana & Dr. Chetan',
+                status: 'Completed',
+                notes: 'International University Fair.'
+            },
+            {
+                id: '206',
+                schoolName: 'Don Bosco International School (DBIS)',
+                month: 'September',
+                date: 'Sep 19, 2026 (8:30 AM - 1:30 PM)',
+                location: 'Matunga East, Mumbai',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Prof. Anil & Ms. Victoria',
+                status: 'Completed',
+                notes: 'DBIS Global University Connect 2026.'
+            },
+            {
+                id: '207',
+                schoolName: 'Don Bosco Senior Secondary School',
+                month: 'September',
+                date: 'Sep 24, 2026 (8:30 AM - 2:30 PM)',
+                location: 'Nerul, Navi Mumbai, Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Admissions Team',
+                status: 'Upcoming',
+                notes: 'Education to Vocation 2026 – Career Educational Fair.'
+            },
+            {
+                id: '208',
+                schoolName: 'Singhania School',
+                month: 'September',
+                date: 'Sep 26, 2026 (9:00 AM - 12:00 PM)',
+                location: 'Mumbai, Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Admissions Team',
+                status: 'Upcoming',
+                notes: 'The University Showcase 2026.'
+            },
+            // Jabalpur Tour (September / October 2026)
+            {
+                id: '401',
+                schoolName: 'St. Aloysius School',
+                month: 'September',
+                date: 'Sep 28, 2026',
+                location: 'Jabalpur, Madhya Pradesh',
+                type: 'Vidyal AI Session',
+                department: 'Office of Admissions',
+                personnel: 'Outreach & Tech Team',
+                status: 'Upcoming',
+                notes: 'Special Vidyal AI session for senior school students in Jabalpur.'
+            },
+            {
+                id: '402',
+                schoolName: 'Satya Prakash Public School',
+                month: 'September',
+                date: 'Sep 29, 2026',
+                location: 'Jabalpur, Madhya Pradesh',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Outreach & Admissions Team',
+                status: 'Upcoming',
+                notes: 'Global University Connect 2026 Fair at Satya Prakash Public School.'
+            },
+            {
+                id: '403',
+                schoolName: 'Jabalpur Partner School ',
+                month: 'September',
+                date: 'Sep 29, 2026 (Afternoon)',
+                location: 'Jabalpur, Madhya Pradesh',
+                type: 'Career Guidance Session',
+                department: 'Office of Admissions',
+                personnel: 'Outreach Team',
+                status: 'Upcoming',
+                notes: 'Jabalpur outreach tour school visit day 2.'
+            },
+            {
+                id: '404',
+                schoolName: 'Jabalpur Partner School ',
+                month: 'September',
+                date: 'Sep 30, 2026',
+                location: 'Jabalpur, Madhya Pradesh',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Outreach Team',
+                status: 'Upcoming',
+                notes: 'Jabalpur outreach tour school visit day 3.'
+            },
+            {
+                id: '405',
+                schoolName: 'Jabalpur Partner School ',
+                month: 'October',
+                date: 'Oct 01, 2026',
+                location: 'Jabalpur, Madhya Pradesh',
+                type: 'College Visit',
+                department: 'Office of Admissions',
+                personnel: 'Outreach Team',
+                status: 'Upcoming',
+                notes: 'Jabalpur outreach tour final day campus presentation.'
+            },
+            {
+                id: '209',
+                schoolName: 'SSVM Institutions',
+                month: 'October',
+                date: 'Oct 08 - Oct 09, 2026',
+                location: 'Coimbatore, Tamil Nadu',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Admissions Team',
+                status: 'Upcoming',
+                notes: 'SSVM Institutions Coimbatore University Fair.'
+            },
+            {
+                id: '210',
+                schoolName: 'CP Goenka International School',
+                month: 'October',
+                date: 'Oct 10, 2026 (10:30 AM - 1:30 PM)',
+                location: 'Maharashtra',
+                type: 'School Education Fair',
+                department: 'Office of Admissions',
+                personnel: 'Admissions Team',
+                status: 'Upcoming',
+                notes: 'CPGIS University Fair Event RSVP 2026.'
+            }
+        ];
+
+        let currentFilter = 'All';
+        let currentStatusFilter = 'All';
+        let searchQuery = '';
+
+        // Badge styling for event types
+        function getTypeBadgeStyle(type) {
+            switch (type) {
+                case 'School Education Fair': return 'bg-purple-100 text-purple-700 border-purple-200';
+                case 'Career Guidance Session': return 'bg-blue-100 text-blue-700 border-blue-200';
+                case 'Vidyal AI Session': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+                case 'LiFE Programme Session': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                case 'College Visit': return 'bg-amber-100 text-amber-800 border-amber-200';
+                case 'Workshop': return 'bg-rose-100 text-rose-700 border-rose-200';
+                default: return 'bg-slate-100 text-slate-700 border-slate-200';
+            }
+        }
+
+        // Badge styling for status
+        function getStatusBadgeStyle(status) {
+            switch (status) {
+                case 'Completed': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                case 'Upcoming': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                case 'Cancelled': return 'bg-rose-50 text-rose-700 border-rose-200';
+                default: return 'bg-slate-50 text-slate-700 border-slate-200';
+            }
+        }
+
+        function renderVisits() {
+            const container = document.getElementById('visits-container');
+            const emptyState = document.getElementById('empty-state');
+
+            // Filter logic
+            let filtered = visits.filter(v => {
+                const matchesMonth = currentFilter === 'All' || v.month === currentFilter;
+                const matchesStatus = currentStatusFilter === 'All' || v.status === currentStatusFilter;
+                const query = searchQuery.toLowerCase();
+                const matchesSearch = v.schoolName.toLowerCase().includes(query) ||
+                    v.location.toLowerCase().includes(query) ||
+                    v.personnel.toLowerCase().includes(query) ||
+                    v.department.toLowerCase().includes(query) ||
+                    v.type.toLowerCase().includes(query) ||
+                    v.month.toLowerCase().includes(query);
+                return matchesMonth && matchesStatus && matchesSearch;
+            });
+
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(visit => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between hover:shadow-md transition relative group";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full border ${getTypeBadgeStyle(visit.type)}">
+                                ${visit.type}
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 text-[11px] font-medium rounded-md border ${getStatusBadgeStyle(visit.status)}">
+                                    ${visit.status}
+                                </span>
+                                <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition ml-1">
+                                    <button onclick="openEditModal('${visit.id}')" class="text-slate-400 hover:text-indigo-600 p-1.5 rounded transition" title="Edit Visit"><i class="fa-solid fa-pen text-xs"></i></button>
+                                    <button onclick="deleteVisit('${visit.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 rounded transition" title="Delete Visit"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="font-bold text-slate-900 text-lg mb-1">${visit.schoolName}</h3>
+                        
+                        <div class="space-y-1.5 text-xs text-slate-600 my-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-calendar text-indigo-600 w-4"></i>
+                                <span class="font-medium text-slate-700">${visit.date}</span> 
+                                <span class="text-slate-400">(${visit.month})</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-location-dot text-indigo-600 w-4"></i>
+                                <span>${visit.location}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-building text-indigo-600 w-4"></i>
+                                <span class="text-slate-700">${visit.department}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-user-tie text-indigo-600 w-4"></i>
+                                <span class="font-medium text-slate-800">${visit.personnel}</span>
+                            </div>
+                        </div>
+
+                        ${visit.notes ? `<p class="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 italic mt-2">"${visit.notes}"</p>` : ''}
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+                        <span>ID: #${visit.id}</span>
+                        <span class="font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">${visit.month} Schedule</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterMonth(month) {
+            currentFilter = month;
+            document.querySelectorAll('.month-tab').forEach(tab => {
+                if (tab.textContent.includes(month) || (month === 'All' && tab.textContent.includes('All'))) {
+                    tab.className = "month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md bg-white text-indigo-900 shadow-sm transition";
+                } else {
+                    tab.className = "month-tab px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-950 transition";
+                }
+            });
+            renderVisits();
+        }
+
+        function filterStatus(status) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                const tabStatus = tab.textContent.trim();
+                if (tabStatus.includes(status) || (status === 'All' && tabStatus.includes('All'))) {
+                    tab.className = "status-tab px-3 py-1 text-xs font-semibold rounded-full bg-indigo-900 text-white transition";
+                } else {
+                    tab.className = "status-tab px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
+                }
+            });
+            renderVisits();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value;
+            renderVisits();
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = 'Schedule School Visit';
+            document.getElementById('visit-form').reset();
+            document.getElementById('visit-id').value = '';
+            document.getElementById('visit-modal').classList.remove('hidden');
+        }
+
+        function openEditModal(id) {
+            const visit = visits.find(v => v.id === id);
+            if (!visit) return;
+
+            document.getElementById('modal-title').textContent = 'Edit School Visit';
+            document.getElementById('visit-id').value = visit.id;
+            document.getElementById('school-name').value = visit.schoolName;
+            document.getElementById('visit-month').value = visit.month;
+            document.getElementById('visit-date').value = visit.date;
+            document.getElementById('visit-location').value = visit.location;
+            document.getElementById('visit-status').value = visit.status || 'Upcoming';
+            document.getElementById('visit-type').value = visit.type;
+            document.getElementById('visit-department').value = visit.department || '';
+            document.getElementById('visit-personnel').value = visit.personnel;
+            document.getElementById('visit-notes').value = visit.notes || '';
+
+            document.getElementById('visit-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('visit-modal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('visit-id').value;
+
+            const visitData = {
+                id: id ? id : Date.now().toString(),
+                schoolName: document.getElementById('school-name').value,
+                month: document.getElementById('visit-month').value,
+                date: document.getElementById('visit-date').value,
+                location: document.getElementById('visit-location').value,
+                status: document.getElementById('visit-status').value,
+                type: document.getElementById('visit-type').value,
+                department: document.getElementById('visit-department').value,
+                personnel: document.getElementById('visit-personnel').value,
+                notes: document.getElementById('visit-notes').value
+            };
+
+            if (id) {
+                const index = visits.findIndex(v => v.id === id);
+                if (index !== -1) visits[index] = visitData;
+            } else {
+                visits.push(visitData);
+            }
+
+            closeModal();
+            renderVisits();
+        }
+
+        function deleteVisit(id) {
+            if (confirm('Are you sure you want to remove this visit from the outreach schedule?')) {
+                visits = visits.filter(v => v.id !== id);
+                renderVisits();
+            }
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(visits, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "admissions_outreach_calendar_jul2026_jan2027.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Initial load
+        renderVisits();
+    </script>
+</body>
+
+</html>
